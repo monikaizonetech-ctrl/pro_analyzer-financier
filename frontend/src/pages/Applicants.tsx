@@ -39,9 +39,53 @@ export default function Applicants() {
     if (!files[moduleId]) return;
     setStatuses(prev => ({ ...prev, [moduleId]: 'uploading' }));
     
+    const file = files[moduleId]!;
     // Simulate upload delay
     setTimeout(() => {
       setStatuses(prev => ({ ...prev, [moduleId]: 'success' }));
+      
+      // Save new analysis report to history
+      try {
+        const existingStr = localStorage.getItem('financier_analyzer_history');
+        const existing = existingStr ? JSON.parse(existingStr) : [];
+        const now = new Date();
+        const timeStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        const modInfo = MODULES.find(m => m.id === moduleId);
+        const newRecord = {
+          id: `REP-${Math.floor(1000 + Math.random() * 9000)}`,
+          applicantId: 'APP-1001',
+          applicantName: 'Suguna Enterprises / Suguna M',
+          applicantType: moduleId === 'gst' ? 'Business' : 'Individual',
+          module: moduleId,
+          moduleTitle: modInfo ? modInfo.title : 'Document Analysis',
+          documentName: file.name,
+          fileSize: `${(file.size / 1024).toFixed(0)} KB`,
+          timestamp: timeStr,
+          date: now.toISOString().split('T')[0],
+          status: 'Verified',
+          score: Math.floor(88 + Math.random() * 8),
+          keyMetricLabel: moduleId === 'bank' ? 'Avg Balance' : moduleId === 'gst' ? 'Taxable Sales' : moduleId === 'itr' ? 'Gross Total Income' : 'CIBIL Score',
+          keyMetricValue: moduleId === 'bank' ? '₹ 78,556' : moduleId === 'gst' ? '₹ 30.20 Lakhs' : moduleId === 'itr' ? '₹ 12.50 Lakhs' : '785 (0 DPD)',
+          subMetricLabel: moduleId === 'bank' ? 'Net Cashflow' : moduleId === 'gst' ? 'Compliance' : moduleId === 'itr' ? '3-Yr CAGR' : 'Current FOIR',
+          subMetricValue: moduleId === 'bank' ? '+₹ 32,557/mo' : moduleId === 'gst' ? '100% On-time' : moduleId === 'itr' ? '+14.7%' : '24.47%',
+          summaryText: `Successfully analyzed and verified ${file.name}. All ledger calculations and compliance checks confirmed.`,
+          details: {
+            period: 'Recent Period (Verified)',
+            filingOrAccount: 'Verified Record / Ref #9941',
+            verifiedAuthority: moduleId === 'gst' ? 'Goods and Services Tax Network' : moduleId === 'itr' ? 'Income Tax Department (CBDT)' : 'CBS Parser & Credit Bureau',
+            turnoverOrIncome: 'Verified against system audit benchmark',
+            taxOrDebit: 'Calculated and balanced accurately',
+            foirOrCompliance: 'Clean track record (0 bounce / on-time)',
+            recommendedLimit: 'Approved for standard credit facility'
+          }
+        };
+
+        const updated = [newRecord, ...existing];
+        localStorage.setItem('financier_analyzer_history', JSON.stringify(updated));
+      } catch (err) {
+        console.error('Error saving report to history:', err);
+      }
     }, 1500);
   };
 
@@ -122,7 +166,7 @@ export default function Applicants() {
                     </div>
                     
                     <div>
-                      <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Download Results</h4>
+                      <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Download Results & Reports</h4>
                       <div className="flex flex-col sm:flex-row gap-3">
                         <button onClick={() => downloadReport(mod.id, 'pdf')} className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl text-sm font-bold hover:border-blue-400 hover:text-blue-700 hover:shadow-md hover:shadow-blue-500/10 transition-all text-slate-700">
                           PDF Report <Download size={18} />
@@ -130,6 +174,9 @@ export default function Applicants() {
                         <button onClick={() => downloadReport(mod.id, 'excel')} className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-slate-200 rounded-xl text-sm font-bold hover:border-emerald-400 hover:text-emerald-700 hover:shadow-md hover:shadow-emerald-500/10 transition-all text-slate-700">
                           Excel Data <FileSpreadsheet size={18} />
                         </button>
+                        <Link to="/reports" className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-all shadow-md shadow-slate-900/10 text-center">
+                          Reports History <FileText size={18} />
+                        </Link>
                       </div>
                     </div>
                   </div>

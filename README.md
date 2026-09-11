@@ -1,5 +1,26 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+
+**1. PostgreSQL**
+```bash
+createdb financier
+createuser proanalyser_user --pwprompt   # set password to proanalyser_pass, or update .env
+```
+
+**2. Backend**
+```bash
+cd backend
+python -m venv venv && source venv/bin/activate   # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env        # edit DATABASE_URL / JWT_SECRET_KEY as needed
+uvicorn app.main:app --reload
+```
+API now runs at `http://localhost:8000` (interactive docs at `/docs`).
+
+**3. Seed sample data**
+```bash
+python seed_db.py
+
 ## Getting Started
 
 First, run the development server:
